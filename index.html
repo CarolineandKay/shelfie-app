@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shelfie - Your Digital Bookshelf</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100vh; }
+header { background: white; padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+.logo { font-size: 2rem; font-weight: 900; letter-spacing: -1px; }
+.logo span:nth-child(1){color:#FF6B6B}
+.logo span:nth-child(2){color:#FF9F43}
+.logo span:nth-child(3){color:#54A0FF}
+.logo span:nth-child(4){color:#5F27CD}
+.logo span:nth-child(5){color:#00D2D3}
+.logo span:nth-child(6){color:#FF6B6B}
+.logo span:nth-child(7){color:#1DD1A1}
+.xp { background: #5F27CD; color: white; padding: 8px 18px; border-radius: 20px; font-weight: 700; font-size: 0.9rem; }
+.hero { text-align: center; padding: 50px 20px 30px; }
+.hero h1 { font-size: 2.5rem; font-weight: 900; color: #2d3436; margin-bottom: 10px; }
+.hero p { font-size: 1.1rem; color: #636e72; }
+.shelf-section { max-width: 900px; margin: 0 auto; padding: 20px; }
+.shelf-title { font-size: 1.2rem; font-weight: 800; color: #2d3436; margin-bottom: 10px; padding-left: 10px; }
+.shelf { background: #8B6914; border-radius: 8px; padding: 20px 20px 12px; margin-bottom: 40px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+.books { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.book { width: 60px; height: 160px; border-radius: 4px 8px 8px 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; position: relative; box-shadow: 3px 3px 8px rgba(0,0,0,0.3); }
+.book:hover { transform: translateY(-12px); }
+.book span { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 0.65rem; font-weight: 800; color: white; text-align: center; padding: 5px; text-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+.shelf-plank { height: 14px; background: #6B4F12; border-radius: 4px; margin: 0 -20px; }
+.reader { display: none; max-width: 900px; margin: 0 auto 40px; background: white; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+.reader.open { display: block; }
+.reader-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.reader-title { font-size: 1.4rem; font-weight: 900; color: #2d3436; }
+.close-btn { background: #ff6b6b; color: white; border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 1.2rem; cursor: pointer; font-weight: 700; }
+.reader-controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.btn { padding: 8px 18px; border-radius: 20px; border: none; cursor: pointer; font-weight: 700; font-size: 0.85rem; transition: opacity 0.2s; }
+.btn:hover { opacity: 0.85; }
+.btn-green { background: #1DD1A1; color: white; }
+.btn-red { background: #FF6B6B; color: white; }
+.btn-blue { background: #54A0FF; color: white; }
+.font-controls { display: flex; gap: 6px; align-items: center; }
+.font-btn { background: #f0f4ff; border: 2px solid #5F27CD; color: #5F27CD; border-radius: 8px; padding: 4px 12px; cursor: pointer; font-weight: 700; }
+.reader-content { font-size: 1rem; line-height: 1.8; color: #444; max-height: 400px; overflow-y: auto; padding-right: 10px; }
+.unlock-section { max-width: 900px; margin: 0 auto 40px; background: white; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+.unlock-section h2 { font-size: 1.4rem; font-weight: 900; margin-bottom: 20px; color: #2d3436; }
+.code-input { display: flex; gap: 10px; margin-bottom: 20px; }
+.code-input input { flex: 1; padding: 12px 18px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; font-weight: 600; }
+.code-input button { background: #5F27CD; color: white; border: none; border-radius: 10px; padding: 12px 24px; font-weight: 700; cursor: pointer; font-size: 1rem; }
+.tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.tier { border-radius: 12px; padding: 20px; text-align: center; color: white; }
+.tier h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 6px; }
+.tier .price { font-size: 1.8rem; font-weight: 900; margin-bottom: 4px; }
+.tier p { font-size: 0.8rem; opacity: 0.9; }
+.toast { position: fixed; bottom: 30px; right: 30px; background: #5F27CD; color: white; padding: 14px 24px; border-radius: 12px; font-weight: 700; box-shadow: 0 4px 20px rgba(0,0,0,0.2); transform: translateY(100px); transition: transform 0.3s; z-index: 999; }
+.toast.show { transform: translateY(0); }
+</style>
+</head>
+<body>
+<header>
+<div class="logo">
+<span>S</span><span>h</span><span>e</span><span>l</span><span>f</span><span>i</span><span>e</span>
+</div>
+<div class="xp" id="xp">⚡ 0 XP</div>
+</header>
+
+<div class="hero">
+<h1>Your Digital Bookshelf ✨</h1>
+<p>Click any book to start reading. Earn XP as you go!</p>
+</div>
+
+<div class="shelf-section">
+<div class="shelf-title">📚 Mindset & Growth</div>
+<div class="shelf">
+<div class="books">
+<div class="book" style="background:#FF6B6B" onclick="openBook('atomic','Atomic Habits','Small habits compound into massive results. The key insight: you do not rise to the level of your goals, you fall to the level of your systems. Every action you take is a vote for the type of person you wish to become. Focus on 1% improvements daily — after one year you will be 37 times better. Identity change is the north star of habit change. Ask: what would a healthy person do? A successful person? A writer? Act like that person now, before you feel like it.')"><span>Atomic Habits</span></div>
+<div class="book" style="background:#FF9F43" onclick="openBook('mindset','Mindset Reset','Your mindset is the single greatest predictor of your success. Fixed mindset people avoid challenges, give up easily, ignore feedback. Growth mindset people embrace challenges, persist through obstacles, learn from criticism. The good news: mindset is a choice. Begin each morning with the question: what will I learn today? Replace the word failing with learning. Replace the phrase I am not good at this with I am not good at this YET.')"><span>Mindset Reset</span></div>
+<div class="book" style="background:#54A0FF" onclick="openBook('deep','Deep Work','In the new economy, the ability to focus without distraction is a superpower. Shallow work is easy to replicate. Deep work produces rare and valuable output. Schedule 90-minute deep work blocks with zero phone access. Your brain is like a muscle — depth is the workout. The people who master deep focus will dominate their fields. Start with one deep work session per day. Protect it like your most important meeting.')"><span>Deep Work</span></div>
+<div class="book" style="background:#5F27CD" onclick="openBook('power','Power of Now','The present moment is the only moment where life actually happens. Anxiety lives in the future. Regret lives in the past. Peace lives in now. When you feel stressed, ask: is there actually a problem right now, in this moment? Most of the time the answer is no. Practice returning to now. Feel your feet on the floor. Breathe. The present moment always will have been — make it count.')"><span>Power of Now</span></div>
+<div class="book" style="background:#1DD1A1" onclick="openBook('rich','Rich Dad','The poor and middle class work for money. The rich have money work for them. Financial education is not taught in schools — and that is intentional. Assets put money in your pocket. Liabilities take money out. Most people think their house is an asset — it is actually a liability until it generates income. Focus your energy on acquiring income-producing assets. Start small. Start now. The game is learnable.')"><span>Rich Dad</span></div>
+</div>
+<div class="shelf-plank"></div>
+</div>
+
+<div class="shelf-title">💪 Wellness & Body</div>
+<div class="shelf">
+<div class="books">
+<div class="book" style="background:#00D2D3" onclick="openBook('sleep','Sleep Smarter','Sleep is the single most effective thing you can do to reset your brain and body. During deep sleep your brain literally cleans itself — flushing out toxins linked to Alzheimers. Sleep deprivation tanks your decision-making, emotional regulation, and metabolism. Non-negotiables: no screens 60 min before bed, same wake time every day, keep your room cold and dark. One good nights sleep will make you smarter, calmer, and more productive than any supplement.')"><span>Sleep Smarter</span></div>
+<div class="book" style="background:#FF6B6B" onclick="openBook('gut','Gut Health','Your gut is your second brain — it produces 95% of your serotonin. When your gut is unhealthy, your mood, energy, and immunity suffer. The fix is simpler than you think: eat 30 different plant foods per week, add fermented foods daily, cut ultra-processed food, and manage stress. Diversity is the goal — the more varied your diet, the more diverse your gut microbiome, and the healthier and happier you become.')"><span>Gut Health</span></div>
+<div class="book" style="background:#FF9F43" onclick="openBook('move','Move Daily','Movement is medicine. You do not need a gym or an hour a day. Research shows 22 minutes of moderate movement daily reduces all-cause mortality by 30%. The best exercise is the one you will actually do. Walk after meals — it blunts blood sugar spikes by up to 40%. Strength train twice a week minimum to protect bone density and metabolism. Sitting for 8 hours erases the benefits of a 1-hour workout — break it up every 30 minutes.')"><span>Move Daily</span></div>
+</div>
+<div class="shelf-plank"></div>
+</div>
+</div>
+
+<div class="reader" id="reader">
+<div class="reader-header">
+<div class="reader-title" id="reader-title">Book Title</div>
+<button class="close-btn" onclick="closeBook()">✕</button>
+</div>
+<div class="reader-controls">
+<button class="btn btn-green" onclick="startRead()">🔊 Read Aloud</button>
+<button class="btn btn-red" onclick="stopRead()">⏹ Stop</button>
+<div class="font-controls">
+<button class="font-btn" onclick="changeFontSize(-1)">A−</button>
+<button class="font-btn" onclick="changeFontSize(1)">A+</button>
+</div>
+</div>
+<div class="reader-content" id="reader-content">Content loads here.</div>
+</div>
+
+<div class="unlock-section">
+<h2>🔑 Unlock More Books</h2>
+<div class="code-input">
+<input type="text" id="code-input" placeholder="Enter your unlock code..." />
+<button onclick="unlockCode()">Unlock</button>
+</div>
+<div class="tiers">
+<div class="tier" style="background:#FF6B6B"><h3>Starter</h3><div class="price">$47</div><p>8 books + Read Aloud</p></div>
+<div class="tier" style="background:#54A0FF"><h3>Growth</h3><div class="price">$97</div><p>25 books + Audio + Video</p></div>
+<div class="tier" style="background:#5F27CD"><h3>Complete</h3><div class="price">$197</div><p>Full library + Gamification</p></div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let xp = 0;
+let fontSize = 16;
+let currentText = '';
+let speaking = false;
+
+const books = {};
+
+function openBook(id, title, content) {
+  books[id] = { title, content };
+  document.getElementById('reader-title').textContent = title;
+  document.getElementById('reader-content').textContent = content;
+  document.getElementById('reader-content').style.fontSize = fontSize + 'px';
+  document.getElementById('reader').classList.add('open');
+  currentText = content;
+  addXP(5, 'Book opened! +5 XP');
+  document.getElementById('reader').scrollIntoView({ behavior: 'smooth' });
+}
+
+function closeBook() {
+  stopRead();
+  document.getElementById('reader').classList.remove('open');
+}
+
+function startRead() {
+  if (!currentText) return;
+  stopRead();
+  const utter = new SpeechSynthesisUtterance(currentText);
+  utter.rate = 0.95;
+  utter.pitch = 1;
+  window.speechSynthesis.speak(utter);
+  speaking = true;
+  addXP(15, 'Listening! +15 XP');
+}
+
+function stopRead() {
+  window.speechSynthesis.cancel();
+  speaking = false;
+}
+
+function changeFontSize(delta) {
+  fontSize = Math.min(Math.max(fontSize + delta, 12), 24);
+  document.getElementById('reader-content').style.fontSize = fontSize + 'px';
+}
+
+function unlockCode() {
+  const val = document.getElementById('code-input').value.trim().toUpperCase();
+  if (val === 'SHELFIE50' || val === 'CAROLINE100') {
+    addXP(50, '🎉 Code unlocked! +50 XP');
+    document.getElementById('code-input').value = '';
+  } else {
+    showToast('❌ Invalid code. Try again!');
+  }
+}
+
+function addXP(amount, msg) {
+  xp += amount;
+  document.getElementById('xp').textContent = '⚡ ' + xp + ' XP';
+  showToast(msg || '+' + amount + ' XP');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
